@@ -1,8 +1,11 @@
 # bot.py
 import os
 import discord
-
+from database import Database
 from dotenv import load_dotenv
+from datetime import datetime
+from bot_functions import BotFunctions
+
 # file path for token.ENV file.
 TOKEN_PATH = os.path.abspath(os.getcwd()) + "/token.ENV"
 # setting environment variable.
@@ -12,7 +15,23 @@ load_dotenv(dotenv_path=TOKEN_PATH)
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
+# object initialization
 client = discord.Client()
+actions = BotFunctions()
+
+# Database object and variables
+DATABASE_PATH = f"{os.getcwd()}/discord.db"
+database = Database()
+
+# creating database
+connection = database.create_connection(DATABASE_PATH)
+
+
+for table in database.sql_create_tables:
+    # print(table)
+    db_conn = database.create_connection(DATABASE_PATH)
+    database.create_table(db_conn, table)
+
 
 @client.event
 async def on_ready():
@@ -32,10 +51,32 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content == "$hello" or message.content == "$Hello":
+    if message.content == "!hello" or message.content == "!Hello":
         response = f'Hello!'
         await message.channel.send(response)
-    
+    elif message.content == "!time" or message.content == "!Time":
+        date_time = datetime.now()
+        response = f'Here is the date and time: {date_time}'
+        await message.channel.send(response)
+    elif message.content.startswith("!addquote"):
+        quote = message.content
+        trimmed_quote = actions.get_quote(quote)
+        connection = database.create_connection(DATABASE_PATH)
+        database.add_quote(connection, trimmed_quote)
+        response = f"added quote {trimmed_quote[0]} {trimmed_quote[1]}"
+        await message.channel.send(response)
+    elif message.content == "!inspireme":
+        connection = database.create_connection(DATABASE_PATH)
+        quotes = database.get_quote(connection)
+        inspiration = actions.inspire_me(quotes)
+        response = f"{inspiration[1]} {inspiration[2]}"
+        await message.channel.send(response)
+
+
+
+
+
+
 
 
 client.run(TOKEN)
