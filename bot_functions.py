@@ -34,6 +34,7 @@ class BotFunctions:
         return quote
 
     def roll(self, dice_string):
+        print(f"original dice_string {dice_string}")
         char_list = []
         for char in dice_string:
             char_list.append(char)
@@ -66,6 +67,8 @@ class BotFunctions:
         place_holder = "".join(place_holder)
         place_holder = int(place_holder)
         numbers.append(place_holder)
+        print(f"modifier = {modifier}")
+        print(f"modifier symbol = {modifier_symbol}")
         # score calculation.
         score = 0
         x = 0
@@ -75,14 +78,20 @@ class BotFunctions:
             rolls.append(roll)
             score += roll
             x += 1
-        score += modifier
+        if modifier:
+            score += modifier
+        else:
+            modifier = 0
+            modifier_symbol = "+"
         numbers.append(score)
         numbers.append(rolls)
+        print(f"modifier = {modifier}")
+        print(f"modifier symbol = {modifier_symbol}")
         numbers.append(modifier_symbol)
-        numbers.append(modifier)
+        numbers.insert(2, modifier)
         print(numbers)
-        #  {    0         1          2           3           4         5
-        #  [# of dice, # of sides, score, [list of rolls], + or -, modifier]
+        #  [    0         1            2        3           4           5   ]
+        #  [# of dice, # of sides,  modifier, score, [list of rolls], + or -]
         return numbers
 
 

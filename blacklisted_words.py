@@ -25,7 +25,7 @@ class WordScan:
         # people who, like everyone, are trying to live their lives, and are marginalized for their perceived
         # "differences".
         # put banned words here.
-        self.list_of_slurs = []
+        self.list_of_slurs = ["chink", "faggot", "nigger", "wop", "tranny", "cunt", "bitch"]
 
     def check_string(self, string_to_check):
         """
