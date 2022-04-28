@@ -61,10 +61,15 @@ async def on_message(message):
     elif message.content.startswith("!addquote"):
         quote = message.content
         trimmed_quote = actions.get_quote(quote)
-        conn = database.create_connection(DATABASE_PATH)
-        database.add_quote(conn, trimmed_quote)
-        response = f"added quote {trimmed_quote[0]} {trimmed_quote[1]}"
-        await message.channel.send(response)
+        print(f"trimmed_quote = {trimmed_quote}")
+        if trimmed_quote[0] is True:
+            quote_to_add = (trimmed_quote[1], trimmed_quote[2])
+            conn = database.create_connection(DATABASE_PATH)
+            database.add_quote(conn, quote_to_add)
+            response = f"added quote {trimmed_quote[1]} {trimmed_quote[2]}"
+            await message.channel.send(response)
+        else:
+            await message.channel.send("Not adding quote. Due to language.")
     elif message.content == "!inspireme":
         conn = database.create_connection(DATABASE_PATH)
         quotes = database.get_quote(conn)
@@ -75,9 +80,10 @@ async def on_message(message):
         ignore = len("!roll ")
         dice = message.content[ignore:]
         dice_to_roll = actions.roll(dice)
-        response = f"{message.author} rolls {dice_to_roll[0]} dice with {dice_to_roll[1]} sides! \n" \
-                   f"for a total of {dice_to_roll[2]}! \n" \
-                   f"your rolls were {dice_to_roll[3]}"
+        response = f"{message.author} rolls {dice_to_roll[0]} dice with {dice_to_roll[1]} sides! and a modifier of " \
+                   f"{dice_to_roll[5]}{dice_to_roll[2]} \n" \
+                   f"for a total of {dice_to_roll[3]}! \n" \
+                   f"your rolls were {dice_to_roll[4]}"
         await message.channel.send(response)
 
 

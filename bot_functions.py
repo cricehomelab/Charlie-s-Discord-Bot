@@ -1,9 +1,9 @@
 import random
-
+from blacklisted_words import WordScan
 
 class BotFunctions:
     def __init__(self):
-        pass
+        self.scan = WordScan()
 
     def get_quote(self, message_to_trim):
         command_length = len("!addquote ")
@@ -11,16 +11,23 @@ class BotFunctions:
         first_quote = 0
         second_quote = None
         found_quote = 0
-        for num, character in enumerate(quote_to_add):
-            if character == '"' or character == "“" or character == "”":
-                if found_quote == 1:
-                    second_quote = num + 1
-                found_quote += 1
-        quote = quote_to_add[first_quote:second_quote]
-        attribution = quote_to_add[second_quote:]
-        if len(attribution) < 1:
-            attribution = "-Unknown"
-        return quote, attribution
+        # runs through looking for potential data we won't want a discord bot to say.
+        slur_used = self.scan.check_string(message_to_trim)
+        print(f"after checking for language {slur_used}")
+        if not slur_used[0]:
+            for num, character in enumerate(quote_to_add):
+                if character == '"' or character == "“" or character == "”":
+                    if found_quote == 1:
+                        second_quote = num + 1
+                    found_quote += 1
+            quote = quote_to_add[first_quote:second_quote]
+            attribution = quote_to_add[second_quote:]
+            if len(attribution) < 1:
+                attribution = "-Unknown"
+            print(f"get_quote return content True, {quote}, {attribution}")
+            return True, quote, attribution
+        else:
+            return False, "Not adding"
 
     def inspire_me(self, quotes):
         quote = random.choice(quotes)
@@ -32,8 +39,24 @@ class BotFunctions:
             char_list.append(char)
         numbers = []
         place_holder = []
-        for char in char_list:
-            if char.isdigit():
+        modifier = []
+        modifier_symbol = ""
+        for num, char in enumerate(char_list):
+            if char == "+":
+                for character in char_list[num:]:
+                    if character.isdigit():
+                        modifier.append(character)
+                modifier = "".join(modifier)
+                modifier = int(modifier)
+                modifier_symbol = "+"
+            elif char == "-":
+                for character in char_list[num:]:
+                    if character.isdigit():
+                        modifier.append(character)
+                modifier = "".join(modifier)
+                modifier = -abs(int(modifier))
+                modifier_symbol = "-"
+            elif char.isdigit():
                 place_holder.append(char)
             else:
                 place_holder = "".join(place_holder)
@@ -52,8 +75,14 @@ class BotFunctions:
             rolls.append(roll)
             score += roll
             x += 1
+        score += modifier
         numbers.append(score)
         numbers.append(rolls)
+        numbers.append(modifier_symbol)
+        numbers.append(modifier)
+        print(numbers)
+        #  {    0         1          2           3           4         5
+        #  [# of dice, # of sides, score, [list of rolls], + or -, modifier]
         return numbers
 
 
