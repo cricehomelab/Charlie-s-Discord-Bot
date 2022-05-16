@@ -11,3 +11,5 @@ have created several commands that will cause the bot to respond to input in the
   - !inspireme - queries the sqlite database for a quote and inputs it into the channel. 
   - !time - displays the current date and time. 
  
+This application runs on the python 3.9 interepreter. 
+
